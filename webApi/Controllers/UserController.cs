@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using webApi.Models;
+using webApi.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,14 +21,18 @@ namespace webApi.Controllers
             Name = name;
             this.dt = dt;
         }
-    }    /// <summary>
-         /// 用户controller
-         /// </summary>
+    }    
+    
+    /// <summary>
+    /// 用户controller
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
         private static Dictionary<int, Record> data = new ();
+        private static IUserService userService = ServiceFactory.UserService;
+
         /// <summary>
         /// 查询所有用户
         /// </summary>
@@ -35,12 +40,7 @@ namespace webApi.Controllers
         [HttpGet]
         public IEnumerable<UserInfo> Get()
         {
-            UserInfo[] ua = new UserInfo[data.Count];
-            int i = 0;
-            foreach (Record user in data.Values) {
-                ua[i++]=new UserInfo { UserId = user.Id,UserName=user.Name};
-            }
-            return ua;
+            return userService.GetAll();
         }
 
         /// <summary>
@@ -67,8 +67,7 @@ namespace webApi.Controllers
         [HttpPost]
         public void Post([FromBody]UserInfo user)
         {
-            if(!data.ContainsKey(user.UserId))
-                data.Add(user.UserId, new Record(user.UserId, user.UserName, DateTime.Now));
+            userService.Add(user);
         }
 
         /// <summary>
@@ -83,6 +82,7 @@ namespace webApi.Controllers
             {
                 data[id] = new Record(id, name, DateTime.Now);
             }
+            userService.Update(new UserInfo() { UserId = id,UserName = name});
         }
 
         
@@ -93,10 +93,7 @@ namespace webApi.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
-            if (data.ContainsKey(id))
-            {
-                data.Remove(id);
-            }
+            userService.Delete(id);
         }
     }
 }
