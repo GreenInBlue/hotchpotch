@@ -48,7 +48,7 @@ namespace webApi.Depots
             using (var db = new LiteDatabase(dbPath))
             {
                 var users = db.GetCollection<UserInfo>();
-                return users.FindAll();
+                return users.FindAll().ToList();
             }
         }
 
